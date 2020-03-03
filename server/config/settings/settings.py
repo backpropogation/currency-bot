@@ -6,7 +6,7 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.dirname(os.path.abspath(__fil
 
 SECRET_KEY = '-^l)!undd+8d2nuc-jj+c21-01_!&kd#3%v559#g#frf&e9#kq'
 
-DEBUG = True
+DEBUG = os.environ.get('DEBUG', False) == True
 
 ALLOWED_HOSTS = ['*']
 
@@ -102,6 +102,6 @@ MEDIA_URL = "/media/"
 
 LATEST_RATE = 'latest_rate'
 LATEST_RATE_CURRENCIES = 'latest_rate_currencies'
-RATE_TIMEOUT = 60*11
+RATE_TIMEOUT = 60 * 11
 RATES_URL = 'https://api.exchangeratesapi.io/latest?base=USD'
 LATEST_EXCHANGE_RATES = 'latest_exchange_rates'

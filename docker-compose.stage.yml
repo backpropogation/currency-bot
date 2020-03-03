@@ -1,0 +1,90 @@
+version: '3.4'
+services:
+    nginx:
+      restart: always
+      build:
+        context: ./
+        dockerfile: ./nginx/Dockerfile
+      depends_on:
+        - server
+      ports:
+        - 443:443
+        - 80:80
+      volumes:
+        - ./server/media:/nginx/media
+
+
+    server:
+        build:
+          context: .
+          dockerfile: ./server/Dockerfile
+        command: gunicorn config.wsgi -c ./config/gunicorn.py
+        volumes:
+          - ./server:/server
+          - ./server/media:/server/media
+        depends_on:
+          - db
+          - celery
+          - redis
+        environment:
+          DEBUG: 'False'
+          DATABASE_URL: 'postgres://postgres:@db:5432/postgres'
+          BROKER_URL: 'amqp://user:password@rabbitmq:5672/my_vhost'
+        restart: always
+
+    rabbitmq:
+        image: rabbitmq:3.7.5
+        hostname: rabbitmq
+        ports:
+          - 5672:5672
+        expose:
+          - 5672
+        environment:
+          RABBITMQ_DEFAULT_USER: 'user'
+          RABBITMQ_DEFAULT_PASS: 'password'
+          RABBITMQ_DEFAULT_VHOST: 'my_vhost'
+        restart: always
+        
+    db:
+        image: postgres:11.2
+        ports:
+          - 5432:5432
+        environment:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+        restart: always
+
+    redis:
+        image: redis:5.0.5
+        ports:
+          - 6379:6379
+        restart: always
+
+    celery:
+        build:
+          context: ./
+          dockerfile: ./server/Dockerfile
+        command:  celery -A config worker -B -l info -Q default,celery -s /var/run/celerybeat-schedule
+        depends_on:
+          - db
+          - redis
+          - rabbitmq
+        volumes:
+          - ./server:/server
+        environment:
+          DEBUG: 'False'
+          DATABASE_URL: 'postgres://postgres:@db:5432/postgres'
+          BROKER_URL: 'amqp://user:password@rabbitmq:5672/my_vhost'
+        restart: always
+
+    bot:
+      build:
+        context: ./
+        dockerfile: ./Dockerfile.bot
+      command:  python bot.py
+      depends_on:
+        - server
+      env_file:
+        - .env_bot
+      restart: always
+

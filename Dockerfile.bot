@@ -1,0 +1,9 @@
+FROM python:3.7
+
+RUN mkdir /bot
+WORKDIR /bot
+
+COPY ./requirements.bot.txt /bot/
+RUN pip install -r requirements.bot.txt
+
+COPY ./bot.py /bot
