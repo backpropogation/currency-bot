@@ -1,0 +1,12 @@
+Django==2.2.8
+psycopg2-binary==2.8.2
+requests
+dj-database-url==0.5.0
+Pillow
+celery==4.3.0
+djangorestframework==3.10.3
+django-cors-headers
+django-redis
+gunicorn
+django-filter==2.2.0
+matplotlib

@@ -4,6 +4,7 @@ __pycache__/
 *$py.class
 /server/staticfiles
 /server/media/*
+/nginx/ssl/*
 .idea
 *.log
 *.pyc
