@@ -7,6 +7,7 @@ services:
         command: python manage.py runserver 0.0.0.0:8000
         volumes:
           - ./server:/server
+          - ./server/media:/server/media
         depends_on:
           - db
           - celery
@@ -52,6 +53,7 @@ services:
           - rabbitmq
         volumes:
           - ./server:/server
+          - ./server/media:/server/media
         environment:
           DEBUG: 'True'
           DATABASE_URL: 'postgres://postgres:@db:5432/postgres'
