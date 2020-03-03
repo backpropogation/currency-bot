@@ -1,6 +1,6 @@
 # currency-bot for telegram with django rest api
 [API url](https://barakhtaev.engineer/)
-[Bot url](https://t.me/backpropagation_bot)
+Bot nickname @backpropagation_bot
 
 List of commands:
 - `/list` *List of available currency rates from* [this api](https://api.exchangeratesapi.io/), **list is updated every 10 minutes** (celery process parses it and saves to postgres then cache it)
