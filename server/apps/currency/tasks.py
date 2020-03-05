@@ -66,3 +66,4 @@ def draw_graphs():
             else:
                 CurrencyGraph.objects.create(currency_name=currency_name, image=f'graphs/{image_name}')
             plt.clf()
+    plt.close()
