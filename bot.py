@@ -16,7 +16,8 @@ API_TOKEN = os.environ.get('TOKEN')
 RATES_URL = 'https://barakhtaev.engineer/api/rates/'
 GRAPH_URL = 'https://barakhtaev.engineer/api/graphs/'
 EXCHANGE_URL = 'https://barakhtaev.engineer/api/rates/exchange/'
-
+WRONG_ARGS_ERROR = 'Wrong args, call /help for usage info'
+API_ERROR = 'Something went wrong.'
 logging.basicConfig(level=logging.INFO)
 
 bot = Bot(token=API_TOKEN)
@@ -51,11 +52,12 @@ async def list_command(message: types.Message):
 async def exchange_command(message: types.Message):
     await types.ChatActions.typing()
     args = message.get_args().split(' ')
-    if len(args) > 3:
-        await message.reply(text('try again', sep='\n'), parse_mode=ParseMode.MARKDOWN)
-    else:
+
+    if len(args) == 3:
         rates = await get_exchange(*args)
         await message.reply(text(rates, sep='\n'), parse_mode=ParseMode.MARKDOWN)
+    else:
+        await message.reply(text(WRONG_ARGS_ERROR, sep='\n'), parse_mode=ParseMode.MARKDOWN)
 
 
 @dp.message_handler(commands=['graph'])
@@ -63,15 +65,18 @@ async def graph_command(message: types.Message):
     await types.ChatActions.typing()
     args = message.get_args().split(' ')
     if len(args) > 1:
-        await bot.send_message(message.chat.id, text('try again', sep='\n'), parse_mode=ParseMode.MARKDOWN)
-    async with ClientSession() as session:
-        data = json.loads(await fetch(f'{GRAPH_URL}{args[0].upper()}/', session))
-        photo = data.get('image', None)
-        if photo:
-            await bot.send_photo(message.from_user.id, photo=photo, caption='', reply_to_message_id=message.message_id)
-        else:
-            await message.reply(text(data.get('detail', 'Something went wrong'), sep='\n'),
-                                parse_mode=ParseMode.MARKDOWN)
+        await bot.send_message(message.chat.id, text(WRONG_ARGS_ERROR),
+                               parse_mode=ParseMode.MARKDOWN)
+    else:
+        async with ClientSession() as session:
+            data = json.loads(await fetch(f'{GRAPH_URL}{args[0].upper()}/', session))
+            photo = data.get('image', None)
+            if photo:
+                await bot.send_photo(message.from_user.id, photo=photo, caption='',
+                                     reply_to_message_id=message.message_id)
+            else:
+                await message.reply(text(data.get('detail', API_ERROR), sep='\n'),
+                                    parse_mode=ParseMode.MARKDOWN)
 
 
 @dp.message_handler(content_types=ContentType.ANY)
@@ -89,11 +94,10 @@ async def get_exchange(*args):
             'amount': args[1],
             'to_currency': args[2].upper(),
         }
-        print(request_data)
         async with ClientSession() as session:
             async with session.post(EXCHANGE_URL, json=request_data) as response:
                 if response.status != 200:
-                    return json.loads(await response.text()).get('detail', 'Something went wrong')
+                    return json.loads(await response.text()).get('detail', API_ERROR)
                 else:
                     response_data = json.loads(await response.text())
                     message = f'{response_data["amount"]} {response_data["from_currency"]} ' \
@@ -101,7 +105,7 @@ async def get_exchange(*args):
                               f'base currency = {response_data["base_currency"]}'
                     return message
     except ClientConnectorError:
-        return 'Something went wrong'
+        return API_ERROR
 
 
 async def get_content():
