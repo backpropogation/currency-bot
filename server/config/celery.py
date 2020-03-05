@@ -17,6 +17,6 @@ app.conf.beat_schedule = {
     },
     'update-graphs-every-day': {
         'task': 'apps.currency.tasks.draw_graphs',
-        'schedule': crontab(minute='30', hour='14')
+        'schedule': crontab(hour='*/6')
     },
 }

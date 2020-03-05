@@ -28,23 +28,11 @@ services:
           - redis
         environment:
           DEBUG: 'False'
+          CACHE_URL: 'redis://redis:6379/1'
           DATABASE_URL: 'postgres://postgres:@db:5432/postgres'
-          BROKER_URL: 'amqp://user:password@rabbitmq:5672/my_vhost'
+          BROKER_URL: 'redis://redis:6379/0'
         restart: always
 
-    rabbitmq:
-        image: rabbitmq:3.7.5
-        hostname: rabbitmq
-        ports:
-          - 5672:5672
-        expose:
-          - 5672
-        environment:
-          RABBITMQ_DEFAULT_USER: 'user'
-          RABBITMQ_DEFAULT_PASS: 'password'
-          RABBITMQ_DEFAULT_VHOST: 'my_vhost'
-        restart: always
-        
     db:
         image: postgres:11.2
         ports:
@@ -68,13 +56,13 @@ services:
         depends_on:
           - db
           - redis
-          - rabbitmq
         volumes:
           - ./server:/server
         environment:
           DEBUG: 'False'
+          CACHE_URL: 'redis://redis:6379/1'
           DATABASE_URL: 'postgres://postgres:@db:5432/postgres'
-          BROKER_URL: 'amqp://user:password@rabbitmq:5672/my_vhost'
+          BROKER_URL: 'redis://redis:6379/0'
         restart: always
 
     bot:
@@ -87,4 +75,3 @@ services:
       env_file:
         - .env_bot
       restart: always
-

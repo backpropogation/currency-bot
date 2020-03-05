@@ -1,10 +1,9 @@
 import os
 
 
-CELERY_BROKER_URL = os.environ.get('BROKER_URL', 'amqp://user:password@rabbitmq:5672/my_vhost')
+CELERY_BROKER_URL = os.environ.get('BROKER_URL', 'redis://redis:6379/0')
 CELERY_IGNORE_RESULT = True
 CELERY_ACCEPT_CONTENT = ['application/json']
 CELERY_RESULT_SERIALIZER = 'json'
 CELERY_TASK_SERIALIZER = 'json'
-CELERYD_MAX_TASKS_PER_CHILD = 5
-
+CELERYD_MAX_TASKS_PER_CHILD = 1
