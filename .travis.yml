@@ -1,0 +1,14 @@
+language: python
+
+services:
+  - docker
+
+before_install:
+- docker build  -t backpropogation/currency_bot:server_latest  . -f ./server/Dockerfile
+- docker build  -t backpropogation/currency_bot:nginx_latest  . -f ./nginx/Dockerfile
+- docker build  -t backpropogation/currency_bot:bot_latest . -f ./Dockerfile.bot
+
+script:
+- docker push  -t backpropogation/currency_bot:server_latest
+- docker push  -t backpropogation/currency_bot:nginx_latest
+- docker push  -t backpropogation/currency_bot:bot_latest
