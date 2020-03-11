@@ -1,4 +1,6 @@
 # currency-bot for telegram with django rest api
+[![Build Status](https://travis-ci.com/backpropogation/currency-bot.svg?branch=master)](https://travis-ci.com/backpropogation/currency-bot)
+
 [API url](https://barakhtaev.engineer/)
 
 Bot nickname `@backpropagation_bot`
