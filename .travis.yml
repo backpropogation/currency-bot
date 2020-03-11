@@ -1,14 +1,11 @@
 language: python
 
-services:
-  - docker
 
-before_install:
-- docker build  -t backpropogation/currency_bot:server_latest  . -f ./server/Dockerfile
-- docker build  -t backpropogation/currency_bot:nginx_latest  . -f ./nginx/Dockerfile
-- docker build  -t backpropogation/currency_bot:bot_latest . -f ./Dockerfile.bot
+before_script:
+  - docker login -u "${REGISTRY_USERNAME}" -p "${REGISTRY_PASSWORD}"
+  - chmod +x build-and-push.sh
 
-script:
-- docker push  -t backpropogation/currency_bot:server_latest
-- docker push  -t backpropogation/currency_bot:nginx_latest
-- docker push  -t backpropogation/currency_bot:bot_latest
+jobs:
+  include:
+    - stage: build-and-push
+      script: ./build-and-push.sh
