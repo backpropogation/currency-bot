@@ -1,0 +1,64 @@
+version: '3.4'
+services:
+    server:
+        build:
+          context: .
+          dockerfile: ./server/Dockerfile
+        command: gunicorn config.wsgi -c ./config/gunicorn.py
+        volumes:
+          - ./server/media:/server/media
+        depends_on:
+          - db
+          - celery
+          - redis
+        environment:
+          DEBUG: 'False'
+          CACHE_URL: 'redis://redis:6379/1'
+          DATABASE_URL: 'postgres://postgres:@db:5432/postgres'
+          BROKER_URL: 'redis://redis:6379/0'
+        restart: always
+
+    db:
+        image: postgres:11.2
+        ports:
+          - 5432:5432
+        environment:
+          POSTGRES_DB: postgres
+          POSTGRES_USER: postgres
+        restart: always
+
+    redis:
+        image: redis:5.0.5
+        ports:
+          - 6379:6379
+        restart: always
+
+    celery:
+        build:
+          context: ./
+          dockerfile: ./server/Dockerfile
+        command:  celery -A config worker -B -l info -Q default,celery -s /var/run/celerybeat-schedule
+        depends_on:
+          - db
+          - redis
+        volumes:
+          - ./server:/server
+        environment:
+          DEBUG: 'False'
+          CACHE_URL: 'redis://redis:6379/1'
+          DATABASE_URL: 'postgres://postgres:@db:5432/postgres'
+          BROKER_URL: 'redis://redis:6379/0'
+        restart: always
+
+    bot:
+      build:
+        context: ./
+        dockerfile: ./Dockerfile.bot
+      command:  python bot.py
+      depends_on:
+        - server
+      env_file:
+        - .env_bot
+      volumes:
+        - ./server/media:/bot/media
+      restart: always

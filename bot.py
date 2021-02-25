@@ -13,9 +13,9 @@ from aiohttp import ClientSession
 from aiohttp.client_exceptions import ClientConnectorError
 
 API_TOKEN = os.environ.get('TOKEN')
-RATES_URL = 'https://barakhtaev.engineer/api/rates/'
-GRAPH_URL = 'https://barakhtaev.engineer/api/graphs/'
-EXCHANGE_URL = 'https://barakhtaev.engineer/api/rates/exchange/'
+RATES_URL = 'http://server:8000/api/rates/'
+GRAPH_URL = 'http://server:8000/api/graphs/'
+EXCHANGE_URL = 'http://server:8000/api/rates/exchange/'
 WRONG_ARGS_ERROR = 'Wrong args, call /help for usage info'
 API_ERROR = 'Something went wrong.'
 logging.basicConfig(level=logging.INFO)
@@ -71,8 +71,10 @@ async def graph_command(message: types.Message):
         async with ClientSession() as session:
             data = json.loads(await fetch(f'{GRAPH_URL}{args[0].upper()}/', session))
             photo = data.get('image', None)
+
             if photo:
-                await bot.send_photo(message.from_user.id, photo=photo, caption='',
+                filename = photo.split(':8000/')[1]
+                await bot.send_photo(message.from_user.id, photo=open(f'{filename}', "rb"), caption='',
                                      reply_to_message_id=message.message_id)
             else:
                 await message.reply(text(data.get('detail', API_ERROR), sep='\n'),
@@ -114,7 +116,7 @@ async def get_content():
     message = f"Rate parsed on {data['date']} with base currency {bold(data['base_currency'])}:\n"
     message += '\n'.join(
         [
-            f"{bold(currency['name'])}: {italic(currency['rate_to_base_currency'])}"
+            f"{bold(currency['name'])}: {currency['rate_to_base_currency']}"
             for currency in data['currencies']
         ]
     )
